@@ -1,0 +1,30 @@
+
+services:
+  # This is your Database
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  api:
+    build: .   # This tells Docker to look for your 'Dockerfile' in this folder
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      - DB_HOST=db  # 'db' matches the service name above
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
